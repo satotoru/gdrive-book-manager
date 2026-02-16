@@ -1,4 +1,3 @@
-import { serve } from "hono/deno";
 import { google } from "googleapis";
 import { createApp } from "./app.ts";
 import { RealGoogleDriveService } from "./services/drive.ts";
@@ -88,7 +87,7 @@ async function main() {
   });
 
   console.log(`Server running on http://localhost:${PORT}`);
-  serve({ fetch: app.fetch, port: PORT });
+  Deno.serve({ port: PORT }, app.fetch);
 }
 
 main().catch(console.error);
