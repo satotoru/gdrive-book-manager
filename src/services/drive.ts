@@ -189,11 +189,43 @@ export class RealGoogleDriveService implements GoogleDriveService {
     return res.data;
   }
 
+  /**
+   * MyLibrary配下の有効なフォルダIDセットを返す（MyLibrary自身＋著者フォルダ）
+   */
+  private async getMyLibraryFolderIds(): Promise<Set<string>> {
+    const myLibraryId = await this.ensureMyLibraryFolder();
+    const ids = new Set<string>([myLibraryId]);
+
+    const res = await this.drive.files.list({
+      q: `'${myLibraryId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+      fields: "files(id)",
+    });
+
+    for (const folder of (res.data.files || [])) {
+      ids.add(folder.id);
+    }
+    return ids;
+  }
+
+  /**
+   * ファイル一覧をMyLibrary配下のもののみにフィルタする
+   */
+  private filterByMyLibrary(
+    files: DriveFile[],
+    validFolderIds: Set<string>,
+  ): DriveFile[] {
+    return files.filter((file) => {
+      const parents = file.parents;
+      if (!parents || parents.length === 0) return false;
+      return parents.some((pid: string) => validFolderIds.has(pid));
+    });
+  }
+
   async listBooks(
     pageToken?: string,
     pageSize: number = 20,
   ): Promise<DriveFileList> {
-    const myLibraryId = await this.ensureMyLibraryFolder();
+    const validFolderIds = await this.getMyLibraryFolderIds();
     const res = await this.drive.files.list({
       q: `properties has { key='app_type' and value='${APP_TYPE_VALUE}' } and trashed=false`,
       fields:
@@ -204,12 +236,8 @@ export class RealGoogleDriveService implements GoogleDriveService {
       orderBy: "name",
     });
 
-    // Filter to only files under MyLibrary (the query with properties should already do this,
-    // but we add an extra safety check)
-    void myLibraryId;
-
     return {
-      files: res.data.files || [],
+      files: this.filterByMyLibrary(res.data.files || [], validFolderIds),
       nextPageToken: res.data.nextPageToken,
     };
   }
@@ -218,6 +246,7 @@ export class RealGoogleDriveService implements GoogleDriveService {
     query: string,
     pageToken?: string,
   ): Promise<DriveFileList> {
+    const validFolderIds = await this.getMyLibraryFolderIds();
     const escapedQuery = query.replace(/'/g, "\\'");
     const res = await this.drive.files.list({
       q: `properties has { key='app_type' and value='${APP_TYPE_VALUE}' } and (name contains '${escapedQuery}' or properties has { key='title' and value='${escapedQuery}' } or properties has { key='authors' and value='${escapedQuery}' }) and trashed=false`,
@@ -228,7 +257,7 @@ export class RealGoogleDriveService implements GoogleDriveService {
     });
 
     return {
-      files: res.data.files || [],
+      files: this.filterByMyLibrary(res.data.files || [], validFolderIds),
       nextPageToken: res.data.nextPageToken,
     };
   }
