@@ -1,3 +1,5 @@
+import { Readable } from "node:stream";
+import { Buffer } from "node:buffer";
 import { DriveFile, DriveFileList, GoogleDriveService } from "../types.ts";
 
 const MY_LIBRARY_FOLDER_NAME = "MyLibrary";
@@ -120,7 +122,7 @@ export class RealGoogleDriveService implements GoogleDriveService {
       },
       media: {
         mimeType,
-        body: content,
+        body: Readable.from(Buffer.from(content)),
       },
       fields: "id, name, mimeType, properties, parents, webContentLink, size",
     });
@@ -141,7 +143,7 @@ export class RealGoogleDriveService implements GoogleDriveService {
       },
       media: {
         mimeType,
-        body: imageData,
+        body: Readable.from(Buffer.from(imageData)),
       },
       fields: "id, name, mimeType, parents, webContentLink",
     });
