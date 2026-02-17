@@ -3,7 +3,8 @@
     "start": "deno run --allow-net --allow-env --allow-read --allow-write src/main.ts",
     "dev": "deno run --watch --allow-net --allow-env --allow-read --allow-write src/main.ts",
     "dev:mock": "deno run --allow-net --allow-env --allow-read --allow-write src/dev_server.ts",
-    "test": "deno test --allow-net --allow-env --allow-read --allow-write tests/"
+    "test": "deno test --allow-net --allow-env --allow-read --allow-write tests/",
+    "verify": "deno run --allow-net --allow-env --allow-read --allow-write scripts/verify_drive_readonly.ts"
   },
   "imports": {
     "hono": "npm:hono@4",

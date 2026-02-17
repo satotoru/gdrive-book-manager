@@ -11,7 +11,56 @@ export interface TokenInfo {
   expiresAt: number;
 }
 
+interface GcpClientSecretJson {
+  web?: {
+    client_id: string;
+    client_secret: string;
+    auth_uri: string;
+    token_uri: string;
+    redirect_uris?: string[];
+  };
+  installed?: {
+    client_id: string;
+    client_secret: string;
+    auth_uri: string;
+    token_uri: string;
+    redirect_uris?: string[];
+  };
+}
+
 const TOKEN_FILE = "./token.json";
+
+/**
+ * プロジェクトルートから client_secret*.json ファイルを探して読み込む
+ */
+export async function loadClientSecretJson(
+  dir: string = ".",
+): Promise<AuthConfig | null> {
+  try {
+    for await (const entry of Deno.readDir(dir)) {
+      if (
+        entry.isFile &&
+        entry.name.startsWith("client_secret") &&
+        entry.name.endsWith(".json")
+      ) {
+        const path = `${dir}/${entry.name}`;
+        const data = JSON.parse(await Deno.readTextFile(path)) as GcpClientSecretJson;
+        const creds = data.web || data.installed;
+        if (creds) {
+          console.log(`認証情報を読み込みました: ${entry.name}`);
+          return {
+            clientId: creds.client_id,
+            clientSecret: creds.client_secret,
+            redirectUri: creds.redirect_uris?.[0] || "",
+          };
+        }
+      }
+    }
+  } catch {
+    // directory not readable
+  }
+  return null;
+}
 
 export class AuthService {
   private config: AuthConfig;
@@ -19,6 +68,14 @@ export class AuthService {
 
   constructor(config: AuthConfig) {
     this.config = config;
+  }
+
+  get clientId(): string {
+    return this.config.clientId;
+  }
+
+  get clientSecret(): string {
+    return this.config.clientSecret;
   }
 
   async loadToken(): Promise<TokenInfo | null> {

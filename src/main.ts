@@ -7,16 +7,27 @@ import {
   OpenBDService,
 } from "./services/metadata.ts";
 import { CacheService } from "./services/cache.ts";
-import { AuthService } from "./services/auth.ts";
+import { AuthService, loadClientSecretJson } from "./services/auth.ts";
 
 const PORT = parseInt(Deno.env.get("PORT") || "8000");
 
 async function main() {
-  // Load auth config from environment
-  const clientId = Deno.env.get("GOOGLE_CLIENT_ID") || "";
-  const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET") || "";
-  const redirectUri = Deno.env.get("GOOGLE_REDIRECT_URI") ||
+  // 1. client_secret*.json から認証情報を自動読み込み（環境変数より優先）
+  const jsonConfig = await loadClientSecretJson(".");
+
+  const clientId = jsonConfig?.clientId || Deno.env.get("GOOGLE_CLIENT_ID") || "";
+  const clientSecret = jsonConfig?.clientSecret || Deno.env.get("GOOGLE_CLIENT_SECRET") || "";
+  const redirectUri = jsonConfig?.redirectUri ||
+    Deno.env.get("GOOGLE_REDIRECT_URI") ||
     `http://localhost:${PORT}/auth/callback`;
+
+  if (!clientId || !clientSecret) {
+    console.error("エラー: Google認証情報が見つかりません。");
+    console.error("以下のいずれかの方法で設定してください:");
+    console.error("  1. プロジェクトルートに client_secret_*.json を配置");
+    console.error("  2. 環境変数 GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET を設定");
+    Deno.exit(1);
+  }
 
   const authService = new AuthService({
     clientId,
@@ -27,9 +38,10 @@ async function main() {
   // Try to load existing token
   const token = await authService.loadToken();
   if (!token) {
-    console.log("No authentication token found.");
-    console.log(`Please visit: ${authService.getAuthUrl()}`);
-    console.log("After authentication, the token will be saved automatically.");
+    console.log("認証トークンが見つかりません。ブラウザで以下のURLを開いてください:");
+    console.log(authService.getAuthUrl());
+  } else {
+    console.log("認証トークンを読み込みました");
   }
 
   // Create OAuth2 client
