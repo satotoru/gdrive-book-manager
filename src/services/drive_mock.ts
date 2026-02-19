@@ -286,6 +286,20 @@ export class MockGoogleDriveService implements GoogleDriveService {
     return null;
   }
 
+  addFile(file: DriveFile & { content?: Uint8Array }): void {
+    this.files.set(file.id, {
+      id: file.id,
+      name: file.name,
+      mimeType: file.mimeType,
+      properties: file.properties || {},
+      parents: file.parents || [],
+      webContentLink: file.webContentLink,
+      thumbnailLink: file.thumbnailLink,
+      size: file.size,
+      content: file.content,
+    });
+  }
+
   async findFilesByParent(folderId: string): Promise<DriveFile[]> {
     if (this.shouldFail) throw new Error("Drive API error");
     await Promise.resolve();
