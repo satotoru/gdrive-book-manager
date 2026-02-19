@@ -350,7 +350,7 @@ Deno.test("GET /books/:id/download - downloads EPUB (DWN-001, DWN-004)", async (
   assertEquals(body, originalContent);
 });
 
-Deno.test("GET /books/:id/download - downloads PDF (DWN-002)", async () => {
+Deno.test("GET /books/:id/download - downloads PDF with inline disposition (DWN-002)", async () => {
   const { app, bookService } = createTestApp();
   const originalContent = new TextEncoder().encode("PDF file content");
   const file = await bookService.registerBook(
@@ -365,6 +365,10 @@ Deno.test("GET /books/:id/download - downloads PDF (DWN-002)", async () => {
   const res = await app.request(`/books/${file.id}/download`);
   assertEquals(res.status, 200);
   assertEquals(res.headers.get("Content-Type"), "application/pdf");
+  assertEquals(
+    res.headers.get("Content-Disposition")?.includes("inline"),
+    true,
+  );
 });
 
 Deno.test("GET /books/:id/download - file integrity (DWN-003)", async () => {
