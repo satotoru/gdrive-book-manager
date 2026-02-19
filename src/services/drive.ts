@@ -24,9 +24,12 @@ function truncateToBytes(str: string, maxBytes: number): string {
 export function sanitizeProperties(
   properties: Record<string, string>,
 ): Record<string, string> {
+  const encoder = new TextEncoder();
   const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(properties)) {
-    result[key] = truncateToBytes(value, PROPERTY_MAX_BYTES);
+    const keyBytes = encoder.encode(key).length;
+    const maxValueBytes = Math.max(0, PROPERTY_MAX_BYTES - keyBytes);
+    result[key] = truncateToBytes(value, maxValueBytes);
   }
   return result;
 }
