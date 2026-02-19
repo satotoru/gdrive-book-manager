@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/satotoru/ghq/github.com/satotoru/gdrive-book-manager/.claude/hooks/update-claude-md.sh"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/satotoru/ghq/github.com/satotoru/gdrive-book-manager/.claude/hooks/update-claude-md.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
