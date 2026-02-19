@@ -63,10 +63,49 @@ export class CompositeMetadataService implements BookMetadataService {
   }
 
   async fetchByIsbn(isbn: string): Promise<BookMetadata | null> {
+    let result: BookMetadata | null = null;
+
     for (const service of this.services) {
-      const result = await service.fetchByIsbn(isbn);
-      if (result) return result;
+      let current: BookMetadata | null = null;
+      try {
+        current = await service.fetchByIsbn(isbn);
+      } catch {
+        continue;
+      }
+
+      if (!current) continue;
+
+      if (!result) {
+        result = { ...current };
+      } else {
+        result = this.merge(result, current);
+      }
+
+      if (this.isComplete(result)) break;
     }
-    return null;
+
+    return result;
+  }
+
+  private merge(primary: BookMetadata, secondary: BookMetadata): BookMetadata {
+    return {
+      isbn: primary.isbn,
+      title: primary.title,
+      authors: primary.authors || secondary.authors,
+      publisher: primary.publisher || secondary.publisher,
+      publishedDate: primary.publishedDate || secondary.publishedDate,
+      description: primary.description || secondary.description,
+      coverImageUrl: primary.coverImageUrl || secondary.coverImageUrl,
+    };
+  }
+
+  private isComplete(metadata: BookMetadata): boolean {
+    return !!(
+      metadata.authors &&
+      metadata.publisher &&
+      metadata.publishedDate &&
+      metadata.description &&
+      metadata.coverImageUrl
+    );
   }
 }
