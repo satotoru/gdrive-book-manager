@@ -63,3 +63,4 @@ Hono JSX is used (not React). `deno.json` sets `"jsxImportSource": "hono/jsx"`. 
 - **Google Drive API**: 原則として実際のGoogle Drive APIを直接呼び出してはならない。開発・テストでは必ずモック (`MockGoogleDriveService`) を使うこと。やむを得ず実APIを使う場合は `MyLibrary` フォルダ以外は絶対に編集しないこと。
 - **TDD**: 受け入れ試験 (`docs/acceptance-criteria.md`) を完全に満たすように開発すること。テストによって振る舞いを定義し、テストが通るまで修正を繰り返すこと。新機能・バグ修正ともにテストファーストで進める。
 - **Git運用**: `main` ブランチへの直接プッシュ禁止。機能開発・バグ修正は必ずフィーチャーブランチを作成し、PRを通じて `main` にマージすること。
+- **PR・Issue**: タイトル・本文・コメントはすべて日本語で記述すること。
