@@ -48,6 +48,23 @@ Deno.test("sanitizeProperties - short values unchanged", () => {
   assertEquals(result.title, "短いタイトル");
 });
 
+Deno.test("sanitizeProperties - key+value combined does not exceed 124 bytes", () => {
+  const longValue = "あ".repeat(100); // 300 bytes
+  const encoder = new TextEncoder();
+
+  // 長いキー名: "description" = 11 bytes
+  const result1 = sanitizeProperties({ description: longValue });
+  const k1 = encoder.encode("description").length;
+  const v1 = encoder.encode(result1.description).length;
+  assertEquals(k1 + v1 <= 124, true);
+
+  // さらに長いキー名: "published_date" = 14 bytes
+  const result2 = sanitizeProperties({ published_date: longValue });
+  const k2 = encoder.encode("published_date").length;
+  const v2 = encoder.encode(result2.published_date).length;
+  assertEquals(k2 + v2 <= 124, true);
+});
+
 // --- Mock Drive Service tests ---
 
 Deno.test("MockDrive - ensureMyLibraryFolder creates folder (DAT-009)", async () => {
