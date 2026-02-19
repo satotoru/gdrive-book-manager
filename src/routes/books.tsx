@@ -194,10 +194,12 @@ export function createBookRoutes(bookService: BookService): Hono {
         ? "application/pdf"
         : "application/octet-stream";
 
+      const disposition = contentType === "application/pdf" ? "inline" : "attachment";
+
       return new Response(content.buffer as ArrayBuffer, {
         headers: {
           "Content-Type": contentType,
-          "Content-Disposition": `attachment; filename="${encodeURIComponent(file.name)}"`,
+          "Content-Disposition": `${disposition}; filename="${encodeURIComponent(file.name)}"`,
           "Content-Length": String(content.length),
         },
       });

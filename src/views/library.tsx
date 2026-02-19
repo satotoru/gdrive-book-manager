@@ -36,6 +36,7 @@ function BookCard(props: { book: DriveFile; baseUrl: string }) {
         <div class="card-actions justify-end mt-2">
           <a
             href={`${baseUrl}/books/${book.id}/download`}
+            target="_blank"
             class="btn btn-primary btn-xs"
           >
             DL
