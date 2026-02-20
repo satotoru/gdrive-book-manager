@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { logger } from "hono/logger";
 import { BookService } from "./services/book.ts";
 import { BookMetadataService, GoogleDriveService } from "./types.ts";
 import { CacheService } from "./services/cache.ts";
@@ -20,6 +21,8 @@ export function createApp(deps: AppDependencies): { app: Hono; bookService: Book
   );
 
   const app = new Hono();
+
+  app.use("*", logger());
 
   // Mount book routes
   const bookRoutes = createBookRoutes(bookService);
