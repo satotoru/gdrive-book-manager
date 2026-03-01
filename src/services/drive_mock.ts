@@ -261,6 +261,16 @@ export class MockGoogleDriveService implements GoogleDriveService {
     return file.content || new Uint8Array();
   }
 
+  async getFileStream(fileId: string): Promise<ReadableStream> {
+    const content = await this.getFileContent(fileId);
+    return new ReadableStream({
+      start(controller) {
+        controller.enqueue(content);
+        controller.close();
+      },
+    });
+  }
+
   async deleteFile(fileId: string): Promise<void> {
     if (this.shouldFail) throw new Error("Drive API error");
     await Promise.resolve();

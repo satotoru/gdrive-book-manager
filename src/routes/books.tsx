@@ -186,7 +186,7 @@ export function createBookRoutes(bookService: BookService): Hono {
   app.get("/books/:id/download", async (c) => {
     try {
       const id = c.req.param("id");
-      const { content, file } = await bookService.downloadBook(id);
+      const { stream, file } = await bookService.downloadBookStream(id);
 
       const contentType = file.mimeType === "application/epub+zip"
         ? "application/epub+zip"
@@ -196,13 +196,15 @@ export function createBookRoutes(bookService: BookService): Hono {
 
       const disposition = contentType === "application/pdf" ? "inline" : "attachment";
 
-      return new Response(content.buffer as ArrayBuffer, {
-        headers: {
-          "Content-Type": contentType,
-          "Content-Disposition": `${disposition}; filename="${encodeURIComponent(file.name)}"`,
-          "Content-Length": String(content.length),
-        },
-      });
+      const headers: Record<string, string> = {
+        "Content-Type": contentType,
+        "Content-Disposition": `${disposition}; filename="${encodeURIComponent(file.name)}"`,
+      };
+      if (file.size !== undefined) {
+        headers["Content-Length"] = file.size;
+      }
+
+      return new Response(stream, { headers });
     } catch (error) {
       return c.text(`ダウンロードに失敗しました: ${String(error)}`, 500);
     }
