@@ -12,7 +12,7 @@
     "hono/jsx": "npm:hono@^4.12.3/jsx",
     "hono/jsx/jsx-runtime": "npm:hono@^4.12.3/jsx/jsx-runtime",
     "hono/jsx/jsx-dev-runtime": "npm:hono@^4.12.3/jsx/jsx-dev-runtime",
-    "googleapis": "npm:googleapis@144",
+    "googleapis": "npm:googleapis@^171.4.0",
     "@std/assert": "jsr:@std/assert@^1.0.19"
   },
   "compilerOptions": {
