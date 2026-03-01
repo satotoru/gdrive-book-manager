@@ -8,12 +8,12 @@
     "migrate": "deno run --allow-net --allow-env --allow-read --allow-write scripts/migrate_calibre.ts"
   },
   "imports": {
-    "hono": "npm:hono@4",
-    "hono/jsx": "npm:hono@4/jsx",
-    "hono/jsx/jsx-runtime": "npm:hono@4/jsx/jsx-runtime",
-    "hono/jsx/jsx-dev-runtime": "npm:hono@4/jsx/jsx-dev-runtime",
+    "hono": "npm:hono@^4.12.3",
+    "hono/jsx": "npm:hono@^4.12.3/jsx",
+    "hono/jsx/jsx-runtime": "npm:hono@^4.12.3/jsx/jsx-runtime",
+    "hono/jsx/jsx-dev-runtime": "npm:hono@^4.12.3/jsx/jsx-dev-runtime",
     "googleapis": "npm:googleapis@144",
-    "@std/assert": "jsr:@std/assert@1"
+    "@std/assert": "jsr:@std/assert@^1.0.19"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
