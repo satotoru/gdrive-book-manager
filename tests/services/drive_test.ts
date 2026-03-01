@@ -310,6 +310,35 @@ Deno.test("MockDrive - getFile and getFileContent (DWN-003)", async () => {
   assertEquals(content, originalContent);
 });
 
+Deno.test("MockDrive - getFileStream returns correct content (DWN-003)", async () => {
+  const drive = new MockGoogleDriveService();
+  const myLibId = await drive.ensureMyLibraryFolder();
+  const authorId = await drive.ensureAuthorFolder(myLibId, "太宰治");
+
+  const originalContent = new TextEncoder().encode("EPUB file content for stream test");
+  const file = await drive.uploadFile(
+    authorId,
+    "test.epub",
+    originalContent,
+    "application/epub+zip",
+    { app_type: "my_library_book" },
+  );
+
+  const stream = await drive.getFileStream(file.id);
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk);
+  }
+  const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  assertEquals(result, originalContent);
+});
+
 Deno.test("MockDrive - deleteFile (DEL-002, DEL-004)", async () => {
   const drive = new MockGoogleDriveService();
   const myLibId = await drive.ensureMyLibraryFolder();

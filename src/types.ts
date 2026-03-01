@@ -50,6 +50,7 @@ export interface GoogleDriveService {
   searchBooks(query: string, pageToken?: string): Promise<DriveFileList>;
   getFile(fileId: string): Promise<DriveFile>;
   getFileContent(fileId: string): Promise<Uint8Array>;
+  getFileStream(fileId: string): Promise<ReadableStream>;
   deleteFile(fileId: string): Promise<void>;
   findBookByIsbn(isbn: string): Promise<DriveFile | null>;
   findFilesByParent(folderId: string): Promise<DriveFile[]>;

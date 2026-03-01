@@ -122,6 +122,12 @@ export class BookService {
     return { content, file };
   }
 
+  async downloadBookStream(fileId: string): Promise<{ stream: ReadableStream; file: DriveFile }> {
+    const file = await this.driveService.getFile(fileId);
+    const stream = await this.driveService.getFileStream(fileId);
+    return { stream, file };
+  }
+
   async deleteBook(fileId: string): Promise<void> {
     // Also delete cover image if exists
     const file = await this.driveService.getFile(fileId);

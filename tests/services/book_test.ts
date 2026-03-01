@@ -238,6 +238,31 @@ Deno.test("BookService - downloadBook returns correct content (DWN-001, DWN-002,
   assertEquals(file.mimeType, "application/epub+zip");
 });
 
+Deno.test("BookService - downloadBookStream returns correct content (DWN-001, DWN-002, DWN-003)", async () => {
+  const { bookService } = createTestServices();
+  const originalContent = new TextEncoder().encode("This is an EPUB file content for streaming");
+
+  await bookService.registerBook(sampleMetadata, originalContent, "application/epub+zip");
+  const list = await bookService.listBooks();
+  const bookId = list.files[0].id;
+
+  const { stream, file } = await bookService.downloadBookStream(bookId);
+  assertEquals(file.mimeType, "application/epub+zip");
+
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk);
+  }
+  const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  assertEquals(result, originalContent);
+});
+
 Deno.test("BookService - deleteBook removes file (DEL-002)", async () => {
   const { bookService } = createTestServices();
   const content = new TextEncoder().encode("epub content");

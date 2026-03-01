@@ -282,6 +282,14 @@ export class RealGoogleDriveService implements GoogleDriveService {
     return new Uint8Array(res.data);
   }
 
+  async getFileStream(fileId: string): Promise<ReadableStream> {
+    const res = await this.drive.files.get(
+      { fileId, alt: "media" },
+      { responseType: "stream" },
+    );
+    return ReadableStream.from(res.data as Readable);
+  }
+
   async deleteFile(fileId: string): Promise<void> {
     await this.drive.files.delete({ fileId });
   }
